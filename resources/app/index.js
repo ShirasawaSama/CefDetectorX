@@ -135,5 +135,6 @@ for (const file of mbStdout.replace(/\r/g, '').split('\n')) {
   }
 }
 
-nodes.sort(([a], [b]) => b - a).forEach(([_, elm], i) => (elm.style.order = i.toString()))
+if (nodes.length) nodes.sort(([a], [b]) => b - a).forEach(([_, elm], i) => (elm.style.order = i.toString()))
+else titleElm.innerText = '这台电脑上没有 Chromium 内核的应用 (也有可能是你没装 Everything)'
 titleElm.className = 'running'
