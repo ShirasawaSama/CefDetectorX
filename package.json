@@ -3,10 +3,10 @@
   "version": "0.0.0",
   "description": "Check how many CEFs are on your Windows.",
   "main": "main.js",
-  "type": "module",
   "private": true,
   "scripts": {
-    "test": "npm start"
+    "start": "electron",
+    "build": "node build"
   },
   "repository": {
     "type": "git",
@@ -29,5 +29,8 @@
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-n": "^15.5.1",
     "eslint-plugin-promise": "^6.1.1"
+  },
+  "dependencies": {
+    "jszip": "^3.10.1"
   }
 }
