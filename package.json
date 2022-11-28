@@ -1,0 +1,33 @@
+{
+  "name": "cef-detector-x",
+  "version": "0.0.0",
+  "description": "Check how many CEFs are on your Windows.",
+  "main": "main.js",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "npm start"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ShirasawaSama/CefDetector.git"
+  },
+  "keywords": [
+    "CEF",
+    "electron",
+    "libcef"
+  ],
+  "author": "Shirasawa",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ShirasawaSama/CefDetector/issues"
+  },
+  "homepage": "https://github.com/ShirasawaSama/CefDetector#readme",
+  "devDependencies": {
+    "eslint": "^8.28.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.5.1",
+    "eslint-plugin-promise": "^6.1.1"
+  }
+}
