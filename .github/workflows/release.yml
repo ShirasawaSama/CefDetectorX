@@ -6,7 +6,7 @@ on:
       - created
 
 jobs:
-  build-plugin:
+  release:
     runs-on: ubuntu-latest
     steps:
       - name: Check out git repository
@@ -23,7 +23,7 @@ jobs:
       - name: Download electron and unzip
         run: |
           wget https://github.com/electron/electron/releases/download/v21.3.1/electron-v21.3.1-win32-x64.zip
-          unzip electron-v21.3.1-win32-x64.zip
+          unzip -n electron-v21.3.1-win32-x64.zip
 
       - name: Build
         run: npm run build
