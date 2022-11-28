@@ -3,7 +3,6 @@ const { promisify } = require('util')
 const { shell } = require('electron')
 const fs = require('fs/promises')
 const path = require('path')
-const { dirname } = require('path')
 
 document.getElementsByTagName('a')[0].onclick = () => shell.openExternal('https://github.com/ShirasawaSama/CefDetectorX')
 
@@ -104,6 +103,7 @@ const { stdout } = await execAsync('es.exe -s _percent.pak', { maxBuffer: TEN_ME
 
 const cache2 = { }
 for (const file of stdout.replace(/\r/g, '').split('\n')) {
+  if (file.includes('$RECYCLE.BIN')) continue
   const dir = path.dirname(file)
   if (cache2[dir]) continue
   cache2[dir] = true
@@ -112,7 +112,7 @@ for (const file of stdout.replace(/\r/g, '').split('\n')) {
   if (res[0]) continue
   if (res[1]) await addApp(res[1], 'Unknown')
   else {
-    res = await search(dirname(dir))
+    res = await search(path.dirname(dir))
     if (res[0]) continue
     if (res[1]) await addApp(res[1], 'Unknown')
     else await addApp(dir, 'Unknown', true)
@@ -121,7 +121,7 @@ for (const file of stdout.replace(/\r/g, '').split('\n')) {
 
 const { stdout: mbStdout } = await execAsync('es.exe -regex node(.*?)\\.dll', { maxBuffer: TEN_MEGABYTES, windowsHide: true })
 for (const file of mbStdout.replace(/\r/g, '').split('\n')) {
-  if (await fs.stat(file).then(it => it.isDirectory(), () => true)) continue
+  if (file.includes('$RECYCLE.BIN') || await fs.stat(file).then(it => it.isDirectory(), () => true)) continue
   const dir = path.dirname(file)
   for (const it of (await fs.readdir(dir)).filter(it => it.endsWith('.exe'))) {
     const fileName = path.join(dir, it)
