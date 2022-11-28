@@ -10,3 +10,4 @@ default_app.asar
 vk_swiftshader_icd.json
 node_modules
 *.zip
+mini_electron.exe

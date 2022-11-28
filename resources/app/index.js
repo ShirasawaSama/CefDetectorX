@@ -100,11 +100,14 @@ const search = async (file) => {
   }
 }
 
-const { stdout } = await execAsync('es.exe -s 100_percent.pak', { maxBuffer: TEN_MEGABYTES, windowsHide: true })
+const { stdout } = await execAsync('es.exe -s _percent.pak', { maxBuffer: TEN_MEGABYTES, windowsHide: true })
 
+const cache2 = { }
 for (const file of stdout.replace(/\r/g, '').split('\n')) {
-  if (await fs.stat(file).then(it => it.isDirectory(), () => true)) continue
   const dir = path.dirname(file)
+  if (cache2[dir]) continue
+  cache2[dir] = true
+  if (await fs.stat(file).then(it => it.isDirectory(), () => true)) continue
   let res = await search(dir)
   if (res[0]) continue
   if (res[1]) await addApp(res[1], 'Unknown')
