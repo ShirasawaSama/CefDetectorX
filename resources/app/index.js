@@ -103,7 +103,7 @@ const { stdout } = await execAsync('es.exe -s _percent.pak', { maxBuffer: TEN_ME
 
 const cache2 = { }
 for (const file of stdout.replace(/\r/g, '').split('\n')) {
-  if (file.includes('$RECYCLE.BIN')) continue
+  if (file.includes('$RECYCLE.BIN') || file.includes('OneDrive')) continue
   const dir = path.dirname(file)
   if (cache2[dir]) continue
   cache2[dir] = true
@@ -121,7 +121,7 @@ for (const file of stdout.replace(/\r/g, '').split('\n')) {
 
 const { stdout: mbStdout } = await execAsync('es.exe -regex node(.*?)\\.dll', { maxBuffer: TEN_MEGABYTES, windowsHide: true })
 for (const file of mbStdout.replace(/\r/g, '').split('\n')) {
-  if (file.includes('$RECYCLE.BIN') || await fs.stat(file).then(it => it.isDirectory(), () => true)) continue
+  if (file.includes('$RECYCLE.BIN') || file.includes('OneDrive') || await fs.stat(file).then(it => it.isDirectory(), () => true)) continue
   const dir = path.dirname(file)
   for (const it of (await fs.readdir(dir)).filter(it => it.endsWith('.exe'))) {
     const fileName = path.join(dir, it)
