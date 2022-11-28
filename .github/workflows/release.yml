@@ -1,0 +1,36 @@
+name: Release
+
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  build-plugin:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out git repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install --production
+
+      - name: Download electron and unzip
+        run: |
+          wget https://github.com/electron/electron/releases/download/v21.3.1/electron-v21.3.1-win32-x64.zip
+          unzip electron-v21.3.1-win32-x64.zip
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: CefDetectorX.zip
+          tag: ${{ github.ref }}
