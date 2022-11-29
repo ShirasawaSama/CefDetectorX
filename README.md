@@ -1,4 +1,4 @@
-# CEF Detector X - 一眼CEF: 年轻人的第二款 Windows CEF检测器
+# CEF Detector X - 一眼CEF X: 年轻人的第二款 Windows CEF检测器 [![Release](https://github.com/ShirasawaSama/CefDetectorX/actions/workflows/release.yml/badge.svg)](https://github.com/ShirasawaSama/CefDetectorX/actions/workflows/release.yml)
 
 Check how many CEFs are on your Windows.
 
