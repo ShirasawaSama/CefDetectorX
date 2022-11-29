@@ -1,6 +1,6 @@
 const { exec } = require('child_process')
 const { promisify } = require('util')
-const { shell } = require('electron')
+const { shell, ipcRenderer } = require('electron')
 const fs = require('fs/promises')
 const path = require('path')
 
@@ -21,6 +21,29 @@ const CEF_SHARP = 'CefSharp.Internals'
 const NWJS = 'url-nwjs'
 const MINI_ELECTRON = 'napi_create_buffer'
 const MINI_BLINK = 'miniblink'
+
+ipcRenderer
+  .invoke('has-args', 'no-bgm')
+  .then(async val => {
+    if (val) return
+    if (await exists(path.join(__dirname, 'bgm.mp3'))) {
+      const audio = new Audio('bgm.mp3')
+      audio.autoplay = true
+      audio.loop = true
+      audio.controls = true
+      document.body.appendChild(audio)
+    } else {
+      const iframe = document.createElement('iframe')
+      iframe.src = 'https://music.163.com/outchain/player?type=2&id=5264829&auto=1&height=32'
+      iframe.frameBorder = 0
+      iframe.border = 0
+      iframe.marginwidth = 0
+      iframe.marginheight = 0
+      iframe.width = 280
+      iframe.height = 52
+      document.body.appendChild(iframe)
+    }
+  })
 
 const getExeIcon = file => execAsync('powershell -Command "Add-Type -AssemblyName System.Drawing;$S=New-Object System.IO.MemoryStream;' +
   `[System.Drawing.Icon]::ExtractAssociatedIcon('${file}').ToBitmap().Save($S,[System.Drawing.Imaging.ImageFormat]::Png);$B=$S.ToArray();$S.Flush();$S.Dispose();'CefDetectorX{{'+[convert]::ToBase64String($B)+'}}'"`)

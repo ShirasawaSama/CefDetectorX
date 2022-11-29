@@ -1,4 +1,6 @@
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, ipcMain } = require('electron')
+
+ipcMain.handle('has-args', (_, arg) => app.commandLine.hasSwitch(arg))
 
 const createWindow = () => {
   const window = new BrowserWindow({

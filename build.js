@@ -24,9 +24,12 @@ const files = [
   'vulkan-1.dll'
 ]
 
+const ZIP_OPTIONS = { type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 9 } }
 const zip = new JSZip()
 zip.file('CefDetectorX/CefDetectorX.exe', fs.readFileSync('electron.exe'))
 Promise
   .all(files.map(it => fs.promises.readFile(it).then(data => zip.file('CefDetectorX/' + it, data))))
-  .then(() => zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 9 } }))
+  .then(() => zip.generateAsync(ZIP_OPTIONS))
+  .then(data => fs.promises.writeFile('CefDetectorX-with-bgm.zip', data))
+  .then(() => zip.remove('CefDetectorX/resources/app/bgm.mp3').generateAsync(ZIP_OPTIONS))
   .then(data => fs.promises.writeFile('CefDetectorX.zip', data))

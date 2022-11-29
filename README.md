@@ -24,6 +24,8 @@ Check how many CEFs are on your Windows.
 - 显示总空间占用
 - 显示当前所运行的进程 (绿色文件名)
 - 单独显示每个程序的空间占用并按大小排序
+- 支持自定义背景音乐 (默认为: [The Magnificent Seven](https://soundcloud.com/7kruzes/the-magnificent-seven), 替换 resources/app/bgm.mp3 即可)
+- 可以通过添加参数 `--no-bgm` 的形式来关闭背景音乐
 
 ## 作者
 
