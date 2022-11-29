@@ -1,5 +1,4 @@
 const { exec } = require('child_process')
-const { promisify } = require('util')
 const { shell, ipcRenderer } = require('electron')
 const fs = require('original-fs').promises
 const path = require('path')
@@ -8,9 +7,11 @@ document.getElementsByTagName('a')[0].onclick = () => shell.openExternal('https:
 
 let cnt = 0
 let totalSize = 0
-const TEN_MEGABYTES = 1000 * 1000 * 10
 const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
-const execAsync = promisify(exec)
+const execAsync = cmd => new Promise(resolve => exec(cmd, { maxBuffer: 1000 * 1000 * 10, windowsHide: true }, (err, stdout, stderr) => {
+  if (err || stdout) console.error(err || stderr)
+  resolve(stdout || '')
+}))
 const exists = file => fs.stat(file).then(it => it.isFile(), () => false)
 const dirSize = async (dir, cache = { }, deep = 0) => {
   if (deep > 10) return
@@ -19,7 +20,9 @@ const dirSize = async (dir, cache = { }, deep = 0) => {
     if (cache[stats.ino]) return
     cache[stats.ino] = true
     totalSize += stats.size
-    if (stats.isDirectory()) await fs.readdir(dir).then(files => Promise.all(files.map(it => dirSize(path.join(dir, it), cache, deep + 1))), () => { })
+    if (stats.isDirectory()) {
+      await Promise.all((await fs.readdir(dir)).map(it => dirSize(path.join(dir, it), cache, deep + 1)))
+    }
   } catch { }
 }
 
@@ -56,7 +59,7 @@ ipcRenderer
 
 const getExeIcon = file => execAsync('powershell -Command "Add-Type -AssemblyName System.Drawing;$S=New-Object System.IO.MemoryStream;' +
   `[System.Drawing.Icon]::ExtractAssociatedIcon('${file}').ToBitmap().Save($S,[System.Drawing.Imaging.ImageFormat]::Png);$B=$S.ToArray();$S.Flush();$S.Dispose();'CefDetectorX{{'+[convert]::ToBase64String($B)+'}}'"`)
-  .then(({ stdout }) => 'data:image/png;base64,' + /CefDetectorX{{(.+)}}/.exec(stdout)?.[1], console.error)
+  .then(stdout => 'data:image/png;base64,' + /CefDetectorX{{(.+)}}/.exec(stdout)?.[1], console.error)
 const prettySize = len => {
   let order = 0
   while (len >= 1024 && order < sizes.length - 1) {
@@ -91,7 +94,7 @@ const addApp = async (file, type, isDir = false) => {
 
 const processes = { }
 try {
-  const { stdout } = await execAsync('wmic process get ExecutablePath', { maxBuffer: TEN_MEGABYTES, windowsHide: true })
+  const { stdout } = await execAsync('wmic process get ExecutablePath')
   stdout.replace(/\r/g, '').replace(/ +\n/g, '\n').split('\n').forEach(it => (processes[it] = 1))
 } catch (e) {
   console.error(e)
@@ -133,28 +136,29 @@ const search = async (file) => {
   }
 }
 
-const { stdout } = await execAsync('es.exe -s _percent.pak', { maxBuffer: TEN_MEGABYTES, windowsHide: true })
-
 const cache2 = { }
-for (const file of stdout.replace(/\r/g, '').split('\n')) {
-  if (file.includes('$RECYCLE.BIN') || file.includes('OneDrive')) continue
-  const dir = path.dirname(file)
-  if (cache2[dir]) continue
-  cache2[dir] = true
-  if (await fs.stat(file).then(it => it.isDirectory(), () => true)) continue
-  let res = await search(dir)
-  if (res[0]) continue
-  if (res[1]) await addApp(res[1], 'Unknown')
-  else {
-    res = await search(path.dirname(dir))
+const searchCef = async stdout => {
+  for (const file of stdout.replace(/\r/g, '').split('\n')) {
+    if (file.includes('$RECYCLE.BIN') || file.includes('OneDrive')) continue
+    const dir = path.dirname(file)
+    if (cache2[dir]) continue
+    cache2[dir] = true
+    if (await fs.stat(file).then(it => it.isDirectory(), () => true)) continue
+    let res = await search(dir)
     if (res[0]) continue
     if (res[1]) await addApp(res[1], 'Unknown')
-    else await addApp(dir, 'Unknown', true)
+    else {
+      res = await search(path.dirname(dir))
+      if (res[0]) continue
+      if (res[1]) await addApp(res[1], 'Unknown')
+      else await addApp(dir, 'Unknown', true)
+    }
   }
 }
+await searchCef(await execAsync('es.exe -s _percent.pak'))
+await searchCef(await execAsync('es.exe -s libcef'))
 
-const { stdout: mbStdout } = await execAsync('es.exe -regex node(.*?)\\.dll', { maxBuffer: TEN_MEGABYTES, windowsHide: true })
-for (const file of mbStdout.replace(/\r/g, '').split('\n')) {
+for (const file of (await execAsync('es.exe -regex node(.*?)\\.dll')).replace(/\r/g, '').split('\n')) {
   if (file.includes('$RECYCLE.BIN') || file.includes('OneDrive') || await fs.stat(file).then(it => it.isDirectory(), () => true)) continue
   const dir = path.dirname(file)
   for (const it of (await fs.readdir(dir)).filter(it => it.endsWith('.exe'))) {
