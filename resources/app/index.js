@@ -23,8 +23,8 @@ const MINI_ELECTRON = 'napi_create_buffer'
 const MINI_BLINK = 'miniblink'
 
 const getExeIcon = file => execAsync('powershell -Command "Add-Type -AssemblyName System.Drawing;$S=New-Object System.IO.MemoryStream;' +
-  `[System.Drawing.Icon]::ExtractAssociatedIcon('${file}').ToBitmap().Save($S,[System.Drawing.Imaging.ImageFormat]::Png);$B=$S.ToArray();$S.Flush();$S.Dispose();[convert]::ToBase64String($B)"`)
-  .then(({ stdout }) => 'data:image/png;base64,' + stdout)
+  `[System.Drawing.Icon]::ExtractAssociatedIcon('${file}').ToBitmap().Save($S,[System.Drawing.Imaging.ImageFormat]::Png);$B=$S.ToArray();$S.Flush();$S.Dispose();'CefDetectorX{{'+[convert]::ToBase64String($B)+'}}'"`)
+  .then(({ stdout }) => 'data:image/png;base64,' + /CefDetectorX{{(.+)}}/.exec(stdout)?.[1], console.error)
 const prettySize = len => {
   let order = 0
   while (len >= 1024 && order < sizes.length - 1) {
@@ -48,7 +48,8 @@ const addApp = async (file, type, isDir = false) => {
   const fileName = path.basename(file)
   elm.title = file
   nodes.push([totalSize - prevSize, elm])
-  elm.innerHTML = (isDir ? '<h3>?</h3>' : `<img src="${await getExeIcon(file)}" alt="${fileName}">`) +
+  const icon = await getExeIcon(file)
+  elm.innerHTML = (isDir || !icon ? '<h3>?</h3>' : `<img src="${icon}" alt="${fileName}">`) +
     `<h6 class=${!isDir && processes[file] ? 'running' : ''}>${fileName}</h6><p>${type}</p><sub>${prettySize(totalSize - prevSize)}</sub>`
   elm.onclick = () => isDir ? shell.openPath(file) : shell.showItemInFolder(file)
   mainElm.appendChild(elm)
