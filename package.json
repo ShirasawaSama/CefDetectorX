@@ -1,6 +1,6 @@
 {
   "name": "cef-detector-x",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Check how many CEFs are on your Windows.",
   "main": "main.js",
   "private": true,
