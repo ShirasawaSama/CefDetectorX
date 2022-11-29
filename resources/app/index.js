@@ -1,7 +1,7 @@
 const { exec } = require('child_process')
 const { promisify } = require('util')
 const { shell, ipcRenderer } = require('electron')
-const fs = require('fs/promises')
+const fs = require('original-fs').promises
 const path = require('path')
 
 document.getElementsByTagName('a')[0].onclick = () => shell.openExternal('https://github.com/ShirasawaSama/CefDetectorX')
@@ -12,7 +12,16 @@ const TEN_MEGABYTES = 1000 * 1000 * 10
 const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
 const execAsync = promisify(exec)
 const exists = file => fs.stat(file).then(it => it.isFile(), () => false)
-const dirSize = async directory => Promise.all((await fs.readdir(directory)).map(file => fs.stat(path.join(directory, file)))).then(it => it.forEach(it => (totalSize += it.size)))
+const dirSize = async (dir, cache = { }, deep = 0) => {
+  if (deep > 10) return
+  try {
+    const stats = await fs.stat(dir)
+    if (cache[stats.ino]) return
+    cache[stats.ino] = true
+    totalSize += stats.size
+    if (stats.isDirectory()) await fs.readdir(dir).then(files => Promise.all(files.map(it => dirSize(path.join(dir, it), cache, deep + 1))), () => { })
+  } catch { }
+}
 
 const LIBCEF = 'cef_string_utf8_to_utf16'
 const ELECTRON = 'third_party/electron_node'
@@ -65,7 +74,7 @@ const addApp = async (file, type, isDir = false) => {
   console.log('Found:', type, file)
   if (cache[file]) return
   const prevSize = totalSize
-  await dirSize(isDir ? path : path.dirname(file))
+  await dirSize(isDir ? file : path.dirname(file))
   cache[file] = true
   const elm = document.createElement('section')
   const fileName = path.basename(file)
@@ -89,6 +98,7 @@ try {
 }
 
 const search = async (file) => {
+  console.log('Searching:', file)
   try {
     let f = path.join(file, 'msedge.exe')
     if (await exists(f)) {
