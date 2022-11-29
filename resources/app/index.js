@@ -9,7 +9,7 @@ let cnt = 0
 let totalSize = 0
 const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
 const execAsync = cmd => new Promise(resolve => exec(cmd, { maxBuffer: 1000 * 1000 * 10, windowsHide: true }, (err, stdout, stderr) => {
-  if (err || stdout) console.error(err || stderr)
+  if (err || stderr) console.error(err || stderr)
   resolve(stdout || '')
 }))
 const exists = file => fs.stat(file).then(it => it.isFile(), () => false)
@@ -94,8 +94,7 @@ const addApp = async (file, type, isDir = false) => {
 
 const processes = { }
 try {
-  const { stdout } = await execAsync('wmic process get ExecutablePath')
-  stdout.replace(/\r/g, '').replace(/ +\n/g, '\n').split('\n').forEach(it => (processes[it] = 1))
+  (await execAsync('wmic process get ExecutablePath')).replace(/\r/g, '').replace(/ +\n/g, '\n').split('\n').forEach(it => (processes[it] = 1))
 } catch (e) {
   console.error(e)
 }
