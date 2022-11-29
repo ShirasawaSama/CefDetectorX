@@ -65,7 +65,7 @@ const addApp = async (file, type, isDir = false) => {
   console.log('Found:', type, file)
   if (cache[file]) return
   const prevSize = totalSize
-  await dirSize(path.dirname(file))
+  await dirSize(isDir ? path : path.dirname(file))
   cache[file] = true
   const elm = document.createElement('section')
   const fileName = path.basename(file)
