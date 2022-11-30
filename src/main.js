@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron')
 
 ipcMain.handle('has-args', (_, arg) => app.commandLine.hasSwitch(arg))
+ipcMain.handle('get-app-icon', (_, path) => app.getFileIcon(path).then(icon => icon.toPNG().toString('base64'), () => ''))
 
 const createWindow = () => {
   const window = new BrowserWindow({

@@ -1,34 +1,30 @@
 const JSZip = require('jszip')
 const fs = require('fs')
+const path = require('path')
 
 const files = [
-  ...fs.readdirSync('resources/app').map(it => 'resources/app/' + it),
-  ...fs.readdirSync('locales').map(it => 'locales/' + it),
-  'chrome_100_percent.pak',
-  'chrome_200_percent.pak',
-  'd3dcompiler_47.dll',
-  'es.exe',
-  'ffmpeg.dll',
-  'icudtl.dat',
-  'libEGL.dll',
-  'libGLESv2.dll',
+  ...fs.readdirSync('src').map(it => ['src/' + it, 'resources/app/' + it]),
   'LICENSE',
-  'LICENSES.chromium.html',
-  'README.md',
-  'resources.pak',
-  'snapshot_blob.bin',
-  'v8_context_snapshot.bin',
-  'version',
-  'vk_swiftshader_icd.json',
-  'vk_swiftshader.dll',
-  'vulkan-1.dll'
+  'es.exe',
+  'README.md'
 ]
+
+const electronRoot = path.resolve(require.resolve('electron'), '../dist')
+const walkDir = dir => fs.promises.readdir(dir).then(list => Promise.all(list.map(async file => {
+  const cur = path.join(dir, file)
+  if ((await fs.promises.stat(cur)).isDirectory()) await walkDir(cur)
+  else {
+    const name = path.relative(electronRoot, cur).replace(/\\/g, '/')
+    if (name === 'LICENSE' || name.startsWith('resources/')) return
+    files.push([cur, name.startsWith('electron') ? 'CefDetectorX' + name.replace(/^electron/, '') : name])
+  }
+})))
 
 const ZIP_OPTIONS = { type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 9 } }
 const zip = new JSZip()
-zip.file('CefDetectorX/CefDetectorX.exe', fs.readFileSync('electron.exe'))
-Promise
-  .all(files.map(it => fs.promises.readFile(it).then(data => zip.file('CefDetectorX/' + it, data))))
+walkDir(electronRoot)
+  .then(() => Promise.all(files.map(it => fs.promises.readFile(typeof it === 'string' ? it : it[0]).then(data => zip.file('CefDetectorX/' + (typeof it === 'string' ? it : it[1]), data)))))
+  .then(() => console.log(Object.keys(zip.files)))
   .then(() => zip.generateAsync(ZIP_OPTIONS))
   .then(data => fs.promises.writeFile('CefDetectorX-with-bgm.zip', data))
   .then(() => zip.remove('CefDetectorX/resources/app/bgm.mp3').generateAsync(ZIP_OPTIONS))

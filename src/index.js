@@ -57,9 +57,6 @@ ipcRenderer
     }
   })
 
-const getExeIcon = file => execAsync('powershell -Command "Add-Type -AssemblyName System.Drawing;$S=New-Object System.IO.MemoryStream;' +
-  `[System.Drawing.Icon]::ExtractAssociatedIcon('${file}').ToBitmap().Save($S,[System.Drawing.Imaging.ImageFormat]::Png);$B=$S.ToArray();$S.Flush();$S.Dispose();'CefDetectorX{{'+[convert]::ToBase64String($B)+'}}'"`)
-  .then(stdout => 'data:image/png;base64,' + /CefDetectorX{{(.+)}}/.exec(stdout)?.[1], console.error)
 const prettySize = len => {
   let order = 0
   while (len >= 1024 && order < sizes.length - 1) {
@@ -83,8 +80,8 @@ const addApp = async (file, type, isDir = false) => {
   const fileName = path.basename(file)
   elm.title = file
   nodes.push([totalSize - prevSize, elm])
-  const icon = await getExeIcon(file)
-  elm.innerHTML = (isDir || !icon ? '<h3>?</h3>' : `<img src="${icon}" alt="${fileName}">`) +
+  const icon = await ipcRenderer.invoke('get-app-icon', file)
+  elm.innerHTML = (icon ? `<img src="data:image/png;base64,${icon}" alt="${fileName}">` : '<h3>?</h3>') +
     `<h6 class=${!isDir && processes[file] ? 'running' : ''}>${fileName}</h6><p>${type}</p><sub>${prettySize(totalSize - prevSize)}</sub>`
   elm.onclick = () => isDir ? shell.openPath(file) : shell.showItemInFolder(file)
   mainElm.appendChild(elm)
@@ -136,7 +133,7 @@ const search = async (file) => {
 }
 
 const cache2 = { }
-const searchCef = async stdout => {
+const searchCef = async (stdout, defaultType = 'Unknown') => {
   for (const file of stdout.replace(/\r/g, '').split('\n')) {
     if (file.includes('$RECYCLE.BIN') || file.includes('OneDrive')) continue
     const dir = path.dirname(file)
@@ -145,17 +142,17 @@ const searchCef = async stdout => {
     if (await fs.stat(file).then(it => it.isDirectory(), () => true)) continue
     let res = await search(dir)
     if (res[0]) continue
-    if (res[1]) await addApp(res[1], 'Unknown')
+    if (res[1]) await addApp(res[1], defaultType)
     else {
       res = await search(path.dirname(dir))
       if (res[0]) continue
-      if (res[1]) await addApp(res[1], 'Unknown')
-      else await addApp(dir, 'Unknown', true)
+      if (res[1]) await addApp(res[1], defaultType)
+      else await addApp(dir, defaultType, true)
     }
   }
 }
 await searchCef(await execAsync('es.exe -s _percent.pak'))
-await searchCef(await execAsync('es.exe -s libcef'))
+await searchCef(await execAsync('es.exe -s libcef'), 'CEF')
 
 for (const file of (await execAsync('es.exe -regex node(.*?)\\.dll')).replace(/\r/g, '').split('\n')) {
   if (file.includes('$RECYCLE.BIN') || file.includes('OneDrive') || await fs.stat(file).then(it => it.isDirectory(), () => true)) continue
