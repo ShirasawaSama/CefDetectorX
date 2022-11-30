@@ -16,6 +16,8 @@ Check how many CEFs are on your Windows.
 
 **你首先需要安装 [Everything](https://www.voidtools.com/) 并完成全硬盘的扫描.**
 
+  _不支持精简版Everything，它不允许 [IPC](https://www.voidtools.com/zh-cn/support/everything/sdk/ipc/) (Inter Process Communication)_
+
 从 [Release](https://github.com/ShirasawaSama/CefDetectorX/releases) 页面下载最新的压缩包, 解压后运行 `CefDetectorX.exe` 即可.
 
 ## 特性
