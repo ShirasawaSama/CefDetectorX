@@ -135,7 +135,7 @@ const search = async (file) => {
 const cache2 = { }
 const searchCef = async (stdout, defaultType = 'Unknown') => {
   for (const file of stdout.replace(/\r/g, '').split('\n')) {
-    if (file.includes('$RECYCLE.BIN') || file.includes('OneDrive')) continue
+    if (file.includes('$RECYCLE.BIN') || file.includes('OneDrive') || /\.log$/i.test(file)) continue
     const dir = path.dirname(file)
     if (cache2[dir]) continue
     cache2[dir] = true
@@ -151,7 +151,7 @@ const searchCef = async (stdout, defaultType = 'Unknown') => {
     }
   }
 }
-await searchCef(await execAsync('es.exe -s _percent.pak'))
+await searchCef(await execAsync('es.exe -regex _100_(.+?)\\.pak$'))
 await searchCef(await execAsync('es.exe -s libcef'), 'CEF')
 
 for (const file of (await execAsync('es.exe -regex node(.*?)\\.dll')).replace(/\r/g, '').split('\n')) {

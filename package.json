@@ -30,7 +30,7 @@
     "eslint-plugin-promise": "^6.1.1"
   },
   "dependencies": {
-    "electron": "^22.0.0",
+    "electron": "^24.0.0",
     "jszip": "^3.10.1"
   }
 }
