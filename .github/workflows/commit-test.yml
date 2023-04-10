@@ -1,0 +1,56 @@
+name: Node.js CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  windows-x86_64:
+    name: Windows-x86_64
+    runs-on: windows-latest
+    steps:
+      - name: Check out git repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install --production
+
+      - name: Build
+        run: npm run build
+        
+      - name: Output to Actions file
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifact-win32-x64
+          path: build/CefDetectorX-win32-x64-with-bgm.zip
+
+  linux-x86_64:
+    name: Linux-x86_64
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out git repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install --production
+
+      - name: Build
+        run: npm run build
+
+      - name: Output to Actions file
+        uses: actions/upload-artifact@v3
+        with:
+          name: artifact-win32-x64
+          path: build/CefDetectorX-linux-x64-with-bgm.zip
