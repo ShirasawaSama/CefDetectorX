@@ -105,6 +105,7 @@ jobs:
             echo "Produced artifact at /artifacts/${artifact_name}"
             npm install --production
             npm run build
+            cp -r "build/*" "/artifacts/"
 
       - name: Show the artifact
         # Items placed in /artifacts in the container will be in
@@ -116,4 +117,4 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: 'artifact-linux-${{ matrix.arch }}'
-          path: 'build/CefDetectorX-linux-${{ matrix.arch }}-with-bgm.zip'
+          path: '${PWD}/artifacts/CefDetectorX-linux-${{ matrix.arch }}-with-bgm.zip'
