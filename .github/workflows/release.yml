@@ -6,7 +6,8 @@ on:
       - created
 
 jobs:
-  release:
+  windows-x86_64:
+    name: Windows-x86_64
     runs-on: windows-latest
     steps:
       - name: Check out git repository
@@ -27,12 +28,44 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: CefDetectorX.zip
+          file: build/CefDetectorX-windows-x64.zip
           tag: ${{ github.ref }}
 
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: CefDetectorX-with-bgm.zip
+          file: build/CefDetectorX-windows-x64-with-bgm.zip
+          tag: ${{ github.ref }}
+          
+  linux-x86_64:
+    name: Linux-x86_64
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out git repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install --production
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build/CefDetectorX-linux-x64.zip
+          tag: ${{ github.ref }}
+
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build/CefDetectorX-linux-x64-with-bgm.zip
           tag: ${{ github.ref }}
