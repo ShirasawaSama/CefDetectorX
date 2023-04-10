@@ -15,6 +15,7 @@ switch (process.platform) {
     //file.push();
 }
 console.log("OS Platform: " + process.platform)
+console.log("OS Arch:  " + process.arch)
 
 const electronRoot = path.resolve(require.resolve('electron'), '../dist')
 const walkDir = dir => fs.promises.readdir(dir).then(list => Promise.all(list.map(async file => {
