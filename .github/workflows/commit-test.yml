@@ -82,6 +82,7 @@ jobs:
 
           # Create an artifacts directory
           setup: |
+            echo "$(PWD)"
             mkdir -p "${PWD}/artifacts"
 
           # Mount the artifacts directory as /artifacts in the container
@@ -90,7 +91,7 @@ jobs:
 
           # Pass some environment variables to the container
           env: | # YAML, but pipe character is necessary
-            artifact_name: git-${{ matrix.distro }}_${{ matrix.arch }}
+            artifact_name: "CefDetectorX-linux-${{ matrix.arch }}.zip"
 
           # The shell to run commands with in the container
           shell: /bin/bash
@@ -102,41 +103,20 @@ jobs:
           # publicly in your project's package repository, so it is vital that
           # no secrets are present in the container state or logs.
           install: |
-            case "${{ matrix.distro }}" in
-              ubuntu*|jessie|stretch|buster|bullseye)
-                apt-get update -q -y
-                apt-get install -q -y git
-                ;;
-              fedora*)
-                dnf -y update
-                dnf -y install git which
-                ;;
-              alpine*)
-                apk update
-                apk add git
-                ;;
-            esac
+           apt-get update && apt-get install -y curl
+           curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
+           apt-get install -y nodejs
           # Produce a binary artifact and place it in the mounted volume
           run: |
-            cp $(which git) "/artifacts/${artifact_name}"
             echo "Produced artifact at /artifacts/${artifact_name}"
+            npm install --production
+            npm run build
 
       - name: Show the artifact
         # Items placed in /artifacts in the container will be in
         # ${PWD}/artifacts on the host.
         run: |
           ls -al "${PWD}/artifacts"
-
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install dependencies
-        run: npm install --production
-
-      - name: Build artifact
-        run: npm run build
 
       - name: Output file to Actions
         uses: actions/upload-artifact@v3
