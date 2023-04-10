@@ -66,8 +66,6 @@ jobs:
             distro: ubuntu_latest
           - arch: s390x
             distro: ubuntu_latest
-          - arch: riscv64
-            distro: ubuntu_latest
     steps:
       - uses: actions/checkout@v3
       - uses: uraimo/run-on-arch-action@v2.5.0
