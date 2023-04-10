@@ -105,16 +105,20 @@ jobs:
             echo "Produced artifact at /artifacts/${artifact_name}"
             npm install --production
             npm run build
-            cp -r "build/*" "/artifacts/"
 
-      - name: Show the artifact
+      - name: Show the folder / Convert Arch Name
         # Items placed in /artifacts in the container will be in
         # ${PWD}/artifacts on the host.
         run: |
-          ls -al "${PWD}/artifacts"
+          echo "List Files"
+          ls -al
+          echo "Convert Arch Name"
+          if [ -f "build/CefDetectorX-linux-arm64-with-bgm.zip" ]; then
+            mv "build/CefDetectorX-linux-arm64-with-bgm.zip" "build/CefDetectorX-linux-${{ matrix.arch }}-with-bgm.zip"
+          fi
 
       - name: Output file to Actions
         uses: actions/upload-artifact@v3
         with:
           name: 'artifact-linux-${{ matrix.arch }}'
-          path: '${PWD}/artifacts/CefDetectorX-linux-${{ matrix.arch }}-with-bgm.zip'
+          path: 'build/CefDetectorX-linux-${{ matrix.arch }}-with-bgm.zip'
