@@ -6,9 +6,15 @@ const os = require('os')
 const files = [
   ...fs.readdirSync('src').map(it => ['src/' + it, 'resources/app/' + it]),
   'LICENSE',
-  'es.exe',
   'README.md'
 ]
+switch (process.platform) {
+  case 'win32':
+    files.push("es.exe");
+  case 'linux':
+    //file.push();
+}
+console.log("OS Platform: " + process.platform)
 
 const electronRoot = path.resolve(require.resolve('electron'), '../dist')
 const walkDir = dir => fs.promises.readdir(dir).then(list => Promise.all(list.map(async file => {
@@ -27,6 +33,6 @@ walkDir(electronRoot)
   .then(() => Promise.all(files.map(it => fs.promises.readFile(typeof it === 'string' ? it : it[0]).then(data => zip.file('CefDetectorX/' + (typeof it === 'string' ? it : it[1]), data)))))
   .then(() => console.log(Object.keys(zip.files)))
   .then(() => zip.generateAsync(ZIP_OPTIONS))
-  .then(data => fs.promises.writeFile('./build/CefDetectorX-'+os.platform()+'-'+os.arch()+'-with-bgm.zip', data))
+  .then(data => fs.promises.writeFile('./build/CefDetectorX-'+process.platform+'-'+process.arch+'-with-bgm.zip', data))
   .then(() => zip.remove('CefDetectorX/resources/app/bgm.mp3').generateAsync(ZIP_OPTIONS))
-  .then(data => fs.promises.writeFile('./build/CefDetectorX-'+os.platform()+'-'+os.arch()+'.zip', data))
+  .then(data => fs.promises.writeFile('./build/CefDetectorX-'+process.platform+'-'+process.arch+'.zip', data))
