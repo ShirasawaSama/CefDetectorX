@@ -25,7 +25,7 @@ jobs:
       - name: Build
         run: npm run build
         
-      - name: Output to Actions file
+      - name: Output file to Actions
         uses: actions/upload-artifact@v3
         with:
           name: artifact-win32-x64
@@ -49,8 +49,8 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Output to Actions file
+      - name: Output file to Actions
         uses: actions/upload-artifact@v3
         with:
-          name: artifact-win32-x64
+          name: artifact-linux-x64
           path: build/CefDetectorX-linux-x64-with-bgm.zip
