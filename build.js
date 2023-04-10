@@ -1,6 +1,7 @@
 const JSZip = require('jszip')
 const fs = require('fs')
 const path = require('path')
+const os = require('os')
 
 const files = [
   ...fs.readdirSync('src').map(it => ['src/' + it, 'resources/app/' + it]),
@@ -26,6 +27,6 @@ walkDir(electronRoot)
   .then(() => Promise.all(files.map(it => fs.promises.readFile(typeof it === 'string' ? it : it[0]).then(data => zip.file('CefDetectorX/' + (typeof it === 'string' ? it : it[1]), data)))))
   .then(() => console.log(Object.keys(zip.files)))
   .then(() => zip.generateAsync(ZIP_OPTIONS))
-  .then(data => fs.promises.writeFile('CefDetectorX-with-bgm.zip', data))
+  .then(data => fs.promises.writeFile('./build/CefDetectorX-'+os.platform()+'-'+os.arch()+'-with-bgm.zip', data))
   .then(() => zip.remove('CefDetectorX/resources/app/bgm.mp3').generateAsync(ZIP_OPTIONS))
-  .then(data => fs.promises.writeFile('CefDetectorX.zip', data))
+  .then(data => fs.promises.writeFile('./build/CefDetectorX-'+os.platform()+'-'+os.arch()+'.zip', data))
