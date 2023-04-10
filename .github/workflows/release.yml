@@ -28,14 +28,14 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/CefDetectorX-windows-x64.zip
+          file: build/CefDetectorX-win32-x64.zip
           tag: ${{ github.ref }}
 
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: build/CefDetectorX-windows-x64-with-bgm.zip
+          file: build/CefDetectorX-win32-x64-with-bgm.zip
           tag: ${{ github.ref }}
           
   linux-x86_64:
