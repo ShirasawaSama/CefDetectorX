@@ -53,7 +53,7 @@ jobs:
 
   linux-multi-arch:
     # The host should always be linux
-    runs-on: ubuntu_latest
+    runs-on: ubuntu-latest
     name: Build On Linux ${{ matrix.arch }}
 
     # Run steps on a matrix of 4 arch/distro combinations
@@ -61,13 +61,9 @@ jobs:
       matrix:
         include:
           - arch: aarch64
-            distro: ubuntu_latest
           - arch: ppc64le
-            distro: ubuntu_latest
           - arch: s390x
-            distro: ubuntu_latest
           - arch: riscv64
-            distro: ubuntu_latest
     steps:
       - uses: actions/checkout@v3
       - uses: uraimo/run-on-arch-action@v2
