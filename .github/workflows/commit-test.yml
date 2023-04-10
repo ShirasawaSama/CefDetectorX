@@ -80,7 +80,7 @@ jobs:
 
           # Create an artifacts directory
           setup: |
-            echo "$(PWD)"
+            echo "${PWD}"
             mkdir -p "${PWD}/artifacts"
 
           # Mount the artifacts directory as /artifacts in the container
@@ -102,7 +102,7 @@ jobs:
           # no secrets are present in the container state or logs.
           install: |
            apt-get update && apt-get install -y curl
-           curl -fsSL https://deb.nodesource.com/setup_16.x | bash -
+           curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
            apt-get install -y nodejs
           # Produce a binary artifact and place it in the mounted volume
           run: |
