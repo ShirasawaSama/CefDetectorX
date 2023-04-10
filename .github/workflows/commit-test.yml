@@ -71,7 +71,7 @@ jobs:
         id: build
         with:
           arch: ${{ matrix.arch }}
-          distro: ${{ matrix.distro }}
+          distro: ubuntu-latest
 
           # Not required, but speeds up builds
           githubToken: ${{ github.token }}
