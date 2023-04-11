@@ -23,7 +23,7 @@ jobs:
       - name: Output file to Actions
         uses: actions/upload-artifact@v3
         with:
-          name: artifact-${{ toLower(runner.os) }}-amd64
+          name: artifact-${{ runner.os }}-amd64
           path: build/CefDetectorX.zip
 
   linux-multi-arch:
@@ -82,5 +82,5 @@ jobs:
       - name: Output file to Actions
         uses: actions/upload-artifact@v3
         with:
-          name: 'artifact-${{ toLower(runner.os) }}-${{ matrix.arch }}'
+          name: 'artifact-${{ runner.os }}-${{ matrix.arch }}'
           path: 'build/CefDetectorX.zip'
