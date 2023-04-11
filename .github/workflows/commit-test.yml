@@ -4,7 +4,7 @@ on: [push, pull_request]
 
 jobs:
   x86_64:
-    name: Build On ${{ runner.os }} x86_64
+    name: Build On ${{ matrix.os }} x86_64
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
