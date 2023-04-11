@@ -3,8 +3,8 @@ name: Commit Test CI
 on: [push, pull_request]
 
 jobs:
-  x86_64:
-    name: Build On ${{ matrix.os }} x86_64
+  amd64:
+    name: Build On ${{ matrix.os }} amd64
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
@@ -23,7 +23,7 @@ jobs:
       - name: Output file to Actions
         uses: actions/upload-artifact@v3
         with:
-          name: artifact-${{ runner.os }}-x64
+          name: artifact-${{ toLower(runner.os) }}-amd64
           path: build/CefDetectorX.zip
 
   linux-multi-arch:
@@ -82,5 +82,5 @@ jobs:
       - name: Output file to Actions
         uses: actions/upload-artifact@v3
         with:
-          name: 'artifact-${{ runner.os }}-${{ matrix.arch }}'
+          name: 'artifact-${{ toLower(runner.os) }}-${{ matrix.arch }}'
           path: 'build/CefDetectorX.zip'
