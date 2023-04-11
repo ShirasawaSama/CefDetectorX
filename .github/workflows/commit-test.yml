@@ -3,53 +3,28 @@ name: Commit Test CI
 on: [push, pull_request]
 
 jobs:
-  windows-x86_64:
-    name: Build On Windows x86_64
-    runs-on: windows-latest
+  x86_64:
+    name: Build On ${{ runner.os }} x86_64
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Check out git repository
         uses: actions/checkout@v3
-
       - name: Install Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
-
       - name: Install dependencies
         run: npm install --production
-
       - name: Build artifact
-        run: npm run build
-        
+        run: node build-commit
       - name: Output file to Actions
         uses: actions/upload-artifact@v3
         with:
-          name: artifact-win32-x64
-          path: build/CefDetectorX-win32-x64-with-bgm.zip
-
-  linux-x86_64:
-    name: Build On Linux x86_64
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out git repository
-        uses: actions/checkout@v3
-
-      - name: Install Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install dependencies
-        run: npm install --production
-
-      - name: Build artifact
-        run: npm run build
-
-      - name: Output file to Actions
-        uses: actions/upload-artifact@v3
-        with:
-          name: artifact-linux-x64
-          path: build/CefDetectorX-linux-x64-with-bgm.zip
+          name: artifact-${{ runner.os }}-x64
+          path: build/CefDetectorX.zip
 
   linux-multi-arch:
     # The host should always be linux
@@ -64,14 +39,12 @@ jobs:
             distro: ubuntu_latest
     steps:
       - uses: actions/checkout@v3
-      - uses: uraimo/run-on-arch-action@v2.5.0
+      - uses: uraimo/run-on-arch-action@v2
         name: Run on architecture
         id: build
         with:
           arch: ${{ matrix.arch }}
           distro: ${{ matrix.distro }}
-
-          # Not required, but speeds up builds
           githubToken: ${{ github.token }}
 
           # Create an artifacts directory
@@ -104,21 +77,10 @@ jobs:
           run: |
             echo "Produced artifact at /artifacts/${artifact_name}"
             npm install --production
-            npm run build
-
-      - name: Show the folder / Convert Arch Name
-        # Items placed in /artifacts in the container will be in
-        # ${PWD}/artifacts on the host.
-        run: |
-          echo "List Files"
-          ls -al
-          echo "Convert Arch Name"
-          if [ -f "build/CefDetectorX-linux-arm64-with-bgm.zip" ]; then
-            mv "build/CefDetectorX-linux-arm64-with-bgm.zip" "build/CefDetectorX-linux-${{ matrix.arch }}-with-bgm.zip"
-          fi
+            node build-commit
 
       - name: Output file to Actions
         uses: actions/upload-artifact@v3
         with:
-          name: 'artifact-linux-${{ matrix.arch }}'
-          path: 'build/CefDetectorX-linux-${{ matrix.arch }}-with-bgm.zip'
+          name: 'artifact-${{ runner.os }}-${{ matrix.arch }}'
+          path: 'build/CefDetectorX.zip'
