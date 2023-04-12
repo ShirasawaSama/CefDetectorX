@@ -60,9 +60,11 @@ jobs:
            curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
            apt-get install -y nodejs
           setup: |
+            echo "The system environment is ready"
+            echo "Please ignore warning from Docker: Architecture mismatch"
+          run: |
             echo "::group::CefBrowserX Pre-compilation preparation"
             npm install --production
-          run: |
             echo "::group::CefBrowserX Build"
             node build-commit
 
