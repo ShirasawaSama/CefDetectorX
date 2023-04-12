@@ -27,12 +27,18 @@ const walkDir = dir => fs.promises.readdir(dir).then(list => Promise.all(list.ma
   }
 })))
 
-const ZIP_OPTIONS = { type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 9 } }
+const ZIP_OPTIONS = {
+  type: 'nodebuffer',
+  compression: 'DEFLATE',
+  compressionOptions: {
+    level: 9
+  }
+}
 const zip = new JSZip()
 walkDir(electronRoot)
   .then(() => Promise.all(files.map(it => fs.promises.readFile(typeof it === 'string' ? it : it[0]).then(data => zip.file('CefDetectorX/' + (typeof it === 'string' ? it : it[1]), data)))))
   .then(() => console.log(Object.keys(zip.files)))
   .then(() => zip.generateAsync(ZIP_OPTIONS))
-  .then(data => fs.promises.writeFile('./build/CefDetectorX-'+process.platform+'-'+process.arch+'-with-bgm.zip', data))
+  .then(data => fs.promises.writeFile('./build/CefDetectorX-' + process.platform + '-' + process.arch + '-with-bgm.zip', data))
   .then(() => zip.remove('CefDetectorX/resources/app/bgm.mp3').generateAsync(ZIP_OPTIONS))
-  .then(data => fs.promises.writeFile('./build/CefDetectorX-'+process.platform+'-'+process.arch+'.zip', data))
+  .then(data => fs.promises.writeFile('./build/CefDetectorX-' + process.platform + '-' + process.arch + '.zip', data))

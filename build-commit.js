@@ -27,7 +27,9 @@ const walkDir = dir => fs.promises.readdir(dir).then(list => Promise.all(list.ma
   }
 })))
 
-fs.mkdir('build/CefDetectorX',{recursive:true}, err => {
+fs.mkdir('build/CefDetectorX', {
+  recursive: true
+}, err => {
   if (err) {
     console.error(err);
   } else {

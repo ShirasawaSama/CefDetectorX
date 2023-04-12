@@ -10,7 +10,7 @@ jobs:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
     runs-on: ${{ matrix.os }}
     steps:
-      - name: Check out git repository
+      - name: Checkout Git Repository
         uses: actions/checkout@v3
       - name: Install Node.js
         uses: actions/setup-node@v3
@@ -39,6 +39,7 @@ jobs:
             distro: ubuntu_latest
     steps:
       - uses: actions/checkout@v3
+        name: Checkout Git Repository
       - uses: uraimo/run-on-arch-action@v2
         name: Run on architecture
         id: build
@@ -47,36 +48,22 @@ jobs:
           distro: ${{ matrix.distro }}
           githubToken: ${{ github.token }}
 
-          # Create an artifacts directory
-          setup: |
-            echo "${PWD}"
-            mkdir -p "${PWD}/artifacts"
-
-          # Mount the artifacts directory as /artifacts in the container
           dockerRunArgs: |
             --volume "${PWD}/artifacts:/artifacts"
 
-          # Pass some environment variables to the container
-          env: | # YAML, but pipe character is necessary
+          env: | 
             artifact_name: "CefDetectorX-linux-${{ matrix.arch }}.zip"
-
-          # The shell to run commands with in the container
           shell: /bin/bash
 
-          # Install some dependencies in the container. This speeds up builds if
-          # you are also using githubToken. Any dependencies installed here will
-          # be part of the container image that gets cached, so subsequent
-          # builds don't have to re-install them. The image layer is cached
-          # publicly in your project's package repository, so it is vital that
-          # no secrets are present in the container state or logs.
           install: |
            apt-get update && apt-get install -y curl
            curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
            apt-get install -y nodejs
-          # Produce a binary artifact and place it in the mounted volume
-          run: |
-            echo "Produced artifact at /artifacts/${artifact_name}"
+          setup: |
+            echo "::group::CefBrowserX Pre-compilation preparation"
             npm install --production
+          run: |
+            echo "::group::CefBrowserX Build"
             node build-commit
 
       - name: Output file to Actions
