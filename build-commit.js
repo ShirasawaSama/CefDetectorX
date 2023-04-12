@@ -1,6 +1,6 @@
-const JSZip = require('jszip')
 const fs = require('fs')
 const path = require('path')
+const fse = require('fs-extra');
 
 const files = [
   ...fs.readdirSync('src').map(it => ['src/' + it, 'resources/app/' + it]),
@@ -27,10 +27,17 @@ const walkDir = dir => fs.promises.readdir(dir).then(list => Promise.all(list.ma
   }
 })))
 
-const ZIP_OPTIONS = { type: 'nodebuffer', compression: 'DEFLATE', compressionOptions: { level: 9 } }
-const zip = new JSZip()
+fs.mkdir('build/CefDetectorX',{recursive:true}, err => {
+  if (err) {
+    console.error(err);
+  } else {
+    console.log('Directory created successfully.');
+  }
+});
+
 walkDir(electronRoot)
-  .then(() => Promise.all(files.map(it => fs.promises.readFile(typeof it === 'string' ? it : it[0]).then(data => zip.file('CefDetectorX/' + (typeof it === 'string' ? it : it[1]), data)))))
-  .then(() => console.log(Object.keys(zip.files)))
-  .then(() => zip.generateAsync(ZIP_OPTIONS))
-  .then(data => fs.promises.writeFile('./build/CefDetectorX.zip', data))
+  .then(() => Promise.all(files.map(it => {
+    const src = typeof it === 'string' ? it : it[0];
+    const dst = 'build/CefDetectorX/' + (typeof it === 'string' ? path.basename(src) : it[1]);
+    return fse.copy(src, dst);
+  })))
