@@ -1,10 +1,28 @@
-name: Commit Test CI
-
-on: [push, pull_request]
+name: Core (No Task)
+on:
+  workflow_call:
+    inputs:
+      type:
+        required: true
+        type: string
+      publish-task:
+        required: false
+        type: string
 
 jobs:
+  mark:
+    name: Display Task ID
+    runs-on: ubuntu-latest
+    steps:
+      - name: Output file to Actions
+        uses: actions/upload-artifact@v3
+        with:
+          name: '0-CefBrowserX-${{ inputs.type }}-${{ github.run_number }}'
+          path: 'README.md'
+
   amd64:
     name: Build On ${{ matrix.os }} amd64
+    needs: mark
     strategy:
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
@@ -30,7 +48,7 @@ jobs:
     # The host should always be linux
     runs-on: ubuntu-latest
     name: Build On Linux ${{ matrix.arch }}
-
+    needs: mark
     # Run steps on a matrix of 4 arch/distro combinations
     strategy:
       matrix:
