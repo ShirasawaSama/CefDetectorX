@@ -1,0 +1,117 @@
+name: Core (No Task)
+on:
+  workflow_call:
+    inputs:
+      type:
+        required: true
+        type: string
+      publish-task:
+        required: false
+        type: string
+
+jobs:
+  mark:
+    name: Display Task ID
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Git Repository
+        uses: actions/checkout@v3
+      - name: Output file to Actions
+        uses: actions/upload-artifact@v3
+        with:
+          name: '0-CefBrowserX-${{ inputs.type }}-${{ github.run_number }}'
+          path: 'README.md'
+
+  amd64:
+    name: Build On ${{ matrix.os }} amd64
+    needs: mark
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout Git Repository
+        uses: actions/checkout@v3
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - name: Install dependencies
+        run: npm install --production
+      - name: Build artifact
+        run: node build-commit
+      - name: Upload to Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: CefBrowserX-${{ runner.os }}-amd64
+          path: build/CefDetectorX
+
+  linux-multi-arch:
+    # The host should always be linux
+    runs-on: ubuntu-latest
+    name: Build On Linux ${{ matrix.arch }}
+    needs: mark
+    # Run steps on a matrix of 4 arch/distro combinations
+    strategy:
+      matrix:
+        include:
+          - arch: aarch64
+            distro: ubuntu_latest
+    steps:
+      - uses: actions/checkout@v3
+        name: Checkout Git Repository
+      - uses: uraimo/run-on-arch-action@v2
+        name: Run on architecture
+        id: build
+        with:
+          arch: ${{ matrix.arch }}
+          distro: ${{ matrix.distro }}
+          githubToken: ${{ github.token }}
+
+          dockerRunArgs: |
+            --volume "${PWD}/artifacts:/artifacts"
+
+          env: | 
+            artifact_name: "CefDetectorX-linux-${{ matrix.arch }}.zip"
+          shell: /bin/bash
+
+          install: |
+           apt-get update && apt-get install -y curl
+           curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+           apt-get install -y nodejs
+          setup: |
+            echo "The system environment is ready"
+            echo "Please ignore warning from Docker: Architecture mismatch"
+          run: |
+            echo "::group::CefBrowserX Pre-compilation preparation"
+            npm install --production
+            echo "::group::CefBrowserX Build"
+            node build-commit
+
+      - name: Output file to Actions
+        uses: actions/upload-artifact@v3
+        with:
+          name: 'CefBrowserX-${{ runner.os }}-${{ matrix.arch }}'
+          path: 'build/CefDetectorX'
+
+  upload-to-virscan:
+    name: Upload To VirScan.org
+    needs: [amd64, linux-multi-arch]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        name: Checkout Git Repository
+      - uses: actions/download-artifact@v3
+        name: Download Artifact Zips
+        with:
+          path: build/artifacts
+      - name: Display structure of downloaded files
+        working-directory: build/artifacts
+        run: ls -R
+      - name: VirusTotal GitHub Action
+        uses: crazy-max/ghaction-virustotal@v3
+        with:
+          vt_api_key: ${{ secrets.VT_API_KEY }}
+          github_token: ${{ github.token }}
+          files: |
+            build/artifacts

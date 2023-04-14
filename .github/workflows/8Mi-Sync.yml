@@ -1,0 +1,50 @@
+name: 8Mi-Tech Auto Sync
+# It works fine, the next build is solved by the machine automatically
+on: 
+  schedule:
+    - cron: '* 0/1 * * *'
+  
+env:
+  TZ: Asia/Shanghai
+
+jobs:
+  checking-repo-env:
+    name: Checking Repo Env
+    if: ${{ vars.VAR_8MI_TECH_FORK_SYNC_BOOLEAN == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - 
+        name: Checkout
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.AUTO_SYNC_GH_KEY }}
+      -
+        name: Set Sync Env
+        run: |
+          echo "::group::set github-actions bot"
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+      -
+        name: Get 8Mi_Yile's Repo
+        uses: wei/wget@v1.1.1
+        with:
+          args: -O Yile.zip https://github.com/8MiYile/$(echo $GITHUB_REPOSITORY|awk -F/ '{printf $2}')/archive/${{ github.ref }}.zip
+      -
+        name: Sync 8Mi_Yile's Repo
+        run: |
+          echo "::group::Unzip source"
+          unzip Yile.zip
+          echo "::group::Move to this repo"
+          rsync -a $(echo $GITHUB_REPOSITORY|awk -F/ '{printf $2}')-$(git branch -l | sed 's/* //')/* $(echo $GITHUB_REPOSITORY|awk -F/ '{printf $2}')-$(git branch -l | sed 's/* //')/.* ./
+          echo "::group::Remove Download's File"
+          rm Yile.zip
+          rm -rfd $(echo $GITHUB_REPOSITORY|awk -F/ '{printf $2}')-$(git branch -l | sed 's/* //')
+          echo "::group::Create Git Commit"
+          git add *
+          git commit -a -m "this commit from 8Mi_Yile's repo" 2>%1
+      -
+        name: Push 8Mi_Yile's Repo
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.AUTO_SYNC_GH_KEY }}
+          branch: ${{ github.ref }}
