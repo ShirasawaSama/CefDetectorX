@@ -1,6 +1,7 @@
 name: 8Mi-Tech Auto Sync
 # It works fine, the next build is solved by the machine automatically
 on: 
+  workflow_dispatch:
   schedule:
     - cron: '* 0/1 * * *'
   
