@@ -14,6 +14,7 @@ iframe {
   position: fixed;
   bottom: 0;
   right: 0;
+  display: none;
 }
 
 audio {
@@ -24,6 +25,7 @@ audio {
   border-radius: 100px;
   position: fixed;
   box-shadow: rgba(0, 0, 0, .2) 0 3px 3px -2px, rgba(0, 0, 0, .14) 0 3px 4px 0, rgba(0, 0, 0, .12) 0 1px 8px 0;
+  display: none;
 }
 
 img, h3 {
